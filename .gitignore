@@ -1,6 +1,3 @@
 .build/
 .claude/
 
-EvalApp/build/
-EvalApp/Data/
-EvalApp/PicknickEval.xcodeproj/
