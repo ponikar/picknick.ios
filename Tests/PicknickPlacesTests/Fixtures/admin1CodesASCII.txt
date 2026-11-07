@@ -1,0 +1,5 @@
+JP.40	Tokyo	Tokyo	1850144
+PT.14	Lisbon	Lisbon	2267056
+PT.17	Porto	Porto	2735941
+FJ.01	Central	Central	2205218
+IS.39	Capital Region	Capital Region	3426182

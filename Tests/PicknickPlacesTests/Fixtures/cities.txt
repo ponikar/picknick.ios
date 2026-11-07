@@ -1,0 +1,9 @@
+1850147	Tokyo	Tokyo	Tokio,Tokyo	35.6895	139.69171	P	PPLC	JP		40				8336599		44	Asia/Tokyo	2022-11-25
+this line is not tab separated
+2267057	Lisbon	Lisbon	Lisboa,Lisbon	38.71667	-9.13333	P	PPLC	PT		14	1106	110658		517802		45	Europe/Lisbon	2022-03-29
+1	Nowhere	Nowhere		abc	10.0	P	PPL	XX		01				100
+2735943	Porto	Porto	Oporto,Porto	41.14961	-8.61099	P	PPLA	PT		17	1312	131210		249633		93	Europe/Lisbon	2022-03-30
+2	Overflow	Overflow		123.0	10.0	P	PPL	XX		01				100
+2198148	Suva	Suva	Suva	-18.14161	178.44149	P	PPLC	FJ		01				77366		13	Pacific/Fiji	2019-09-05
+3	Short	Short		10.0	10.0
+3413829	Reykjavík	Reykjavik	Reikiavik,Reykjavik	64.13548	-21.89541	P	PPLC	IS		39	0000			118918		26	Atlantic/Reykjavik	2019-09-05

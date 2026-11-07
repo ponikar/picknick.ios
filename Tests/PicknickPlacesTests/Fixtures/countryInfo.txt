@@ -1,0 +1,5 @@
+#ISO	ISO3	ISO-Numeric	fips	Country	Capital
+JP	JPN	392	JA	Japan	Tokyo
+PT	PRT	620	PO	Portugal	Lisbon
+FJ	FJI	242	FJ	Fiji	Suva
+IS	ISL	352	IC	Iceland	Reykjavik
