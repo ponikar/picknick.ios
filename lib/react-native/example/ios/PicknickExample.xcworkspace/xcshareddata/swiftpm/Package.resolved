@@ -1,0 +1,15 @@
+{
+  "originHash" : "a03b41d8cbdf534418acd7c8fec184cfabe819d8b69298857376de3522d7ba37",
+  "pins" : [
+    {
+      "identity" : "picknick.ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ponikar/picknick.ios.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "5aa72865c7b6c79706019c70802739dcf9e58d59"
+      }
+    }
+  ],
+  "version" : 3
+}

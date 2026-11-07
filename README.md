@@ -90,6 +90,40 @@ The package bundles none of these. Ship them in your app and pass their URLs.
 - The match probability was calibrated on 298 COCO photos. Your library may score differently.
 - Nonsense words ("xqzvbt") can still match photos with probability up to about 0.9. A minimum of 0.9 removes them but also drops many real matches. Well-known place names with no photos there ("vietnam") return nothing.
 
+## React Native
+
+`lib/react-native` wraps the library as a [Nitro](https://nitro.margelo.com) module (iOS only; tested with React Native 0.88 and Nitro 0.37).
+
+```sh
+npm install react-native-nitro-modules ./path/to/picknick/lib/react-native
+cd ios && pod install
+```
+
+Add the model and GeoNames files to your iOS app target (Xcode compiles each `.mlpackage` into `.mlmodelc`), and add `NSPhotoLibraryUsageDescription` to `Info.plist`. To show results with `<Image>`, also install `@react-native-camera-roll/camera-roll`, which loads `ph://` URIs.
+
+```ts
+import { Picknick } from 'react-native-picknick'
+
+await Picknick.configure({
+  imageModel: 'mobileclip_s2_image.mlmodelc',
+  textModel: 'mobileclip_s2_text.mlmodelc',
+  merges: 'bpe_merges.txt',
+  cities: 'cities15000.txt',
+  countryInfo: 'countryInfo.txt',
+  admin1Codes: 'admin1CodesASCII.txt',
+})
+
+await Picknick.requestPhotoAccess()
+await Picknick.indexLibrary((status) => console.log(`${status.searchable}/${status.total}`))
+
+const hits = await Picknick.search('dog on a beach', { topN: 20, minimumProbability: 0.5 })
+// hits: { id, uri: 'ph://…', probability, matchedBy }[]
+```
+
+File names are looked up in the app bundle; absolute paths work too. `getStatus()` reports progress at any time.
+
+The example app in `lib/react-native/example` has a search screen and a self-test (`scripts/selftest.sh`) that checks ordering, Top N, the minimum probability and a no-match query.
+
 ## Tests
 
 ```

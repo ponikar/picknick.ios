@@ -1,0 +1,41 @@
+{
+  "name": "react-native-picknick",
+  "version": "0.1.0",
+  "description": "On-device photo search for React Native (iOS), powered by Picknick and Nitro Modules",
+  "main": "src/index",
+  "types": "src/index.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "ios/**/*.swift",
+    "nitrogen",
+    "nitro.json",
+    "react-native.config.js",
+    "*.podspec"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "specs": "nitrogen --logLevel=\"debug\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ponikar/picknick.ios.git"
+  },
+  "homepage": "https://github.com/ponikar/picknick.ios",
+  "license": "MIT",
+  "author": "ponikar",
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "nitrogen": "0.37.2",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-nitro-modules": "0.37.2",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-nitro-modules": "*"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["picknick"],
+  "ios": {
+    "iosModuleName": "Picknick"
+  },
+  "android": {
+    "androidNamespace": ["picknick"],
+    "androidCxxLibName": "Picknick"
+  },
+  "autolinking": {
+    "Picknick": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridPicknick"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules", "example"]
+}
