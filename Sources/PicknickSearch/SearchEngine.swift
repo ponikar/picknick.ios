@@ -21,7 +21,7 @@ public actor SearchEngine {
         public var exactMatchProbability: Double
 
         // Slope and intercept are a logistic fit of MobileCLIP-S2 cosine against
-        // caption relevance: 298 COCO photos x 41 queries (EvalApp/EVALS.md).
+        // caption relevance: 298 COCO val2017 photos x 41 caption-based queries.
         // cos 0.15 -> 0.17, 0.20 -> 0.74, 0.25 -> 0.98.
         public init(
             retrievalDepth: Int = 200,
