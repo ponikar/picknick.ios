@@ -81,14 +81,14 @@ The package bundles none of these. Ship them in your app and pass their URLs.
 
 - MobileCLIP S2 Core ML image and text encoders: https://huggingface.co/apple/coreml-mobileclip
 - CLIP BPE merges file `bpe_simple_vocab_16e6.txt` from https://github.com/openai/CLIP, uncompressed.
-- GeoNames `cities15000.txt`, `countryInfo.txt` and `admin1CodesASCII.txt`.
+- GeoNames `cities15000.txt`, `countryInfo.txt` and `admin1CodesASCII.txt`: https://download.geonames.org/export/dump/
 
 ## Known limits
 
 - Tested on macOS, the iOS Simulator and one iPhone.
 - Vision labels fail in the iOS Simulator. Use a device.
 - The match probability was calibrated on 298 COCO photos. Your library may score differently.
-- Nonsense words can still return low-probability matches. Raise `minimumProbability` to drop them.
+- Nonsense words ("xqzvbt") can still match photos with probability up to about 0.9. A minimum of 0.9 removes them but also drops many real matches. Well-known place names with no photos there ("vietnam") return nothing.
 
 ## Tests
 
