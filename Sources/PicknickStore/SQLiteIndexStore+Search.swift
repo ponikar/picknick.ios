@@ -109,6 +109,9 @@ private extension SQLiteIndexStore {
             .map { $0 }
     }
 
+}
+
+extension SQLiteIndexStore {
     /// A `WHERE` fragment over alias `a`, always valid even with no constraints.
     static func filterClause(_ filter: SearchFilter) -> (String, [SQLiteValue]) {
         var clauses = ["1 = 1"]

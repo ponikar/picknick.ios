@@ -11,12 +11,21 @@ public actor SQLiteIndexStore: IndexStore {
     private var connection: SQLiteConnection?
     var embeddingGeneration = 0
 
+    /// Faces whose fingerprints are at most this Euclidean distance apart are
+    /// treated as the same person, for grouping and automatic naming.
+    public let faceCutoff: Double
+
+    /// From FaceCutoffEval on 200 LFW photos of 20 people: the only cutoff with
+    /// at least 90% correct automatic names, though it names under 1% of faces.
+    public static let defaultFaceCutoff = 0.68
+
     /// Parameter count per `IN` clause, kept well under SQLite's own limit so
     /// callers never have to think about how many ids they pass.
     static let bindingChunkSize = 400
 
-    public init(path: String) {
+    public init(path: String, faceCutoff: Double = SQLiteIndexStore.defaultFaceCutoff) {
         self.path = path
+        self.faceCutoff = faceCutoff
     }
 
     /// An in-memory database, for tests and previews.
@@ -43,6 +52,11 @@ public actor SQLiteIndexStore: IndexStore {
         let database = try requireConnection()
 
         try database.transaction {
+            var faceWork = FaceCommit()
+            if try hasUserNames(among: batch.removals, in: database) {
+                faceWork.namesChanged = true
+            }
+
             for id in batch.removals {
                 try database.run("DELETE FROM asset_search WHERE asset_id = ?", [.text(id.rawValue)])
                 try database.run("DELETE FROM asset WHERE id = ?", [.text(id.rawValue)])
@@ -54,8 +68,10 @@ public actor SQLiteIndexStore: IndexStore {
             }
 
             for feature in batch.features {
-                try apply(feature, in: database)
+                try apply(feature, faceWork: &faceWork, in: database)
             }
+
+            try finishFaces(faceWork, in: database)
 
             for completion in batch.completions {
                 try database.run(
@@ -331,7 +347,7 @@ private extension SQLiteIndexStore {
         )
     }
 
-    func apply(_ feature: FeatureRecord, in database: SQLiteConnection) throws {
+    func apply(_ feature: FeatureRecord, faceWork: inout FaceCommit, in database: SQLiteConnection) throws {
         let id = feature.assetID.rawValue
 
         switch feature.value {
@@ -377,6 +393,9 @@ private extension SQLiteIndexStore {
                 """,
                 [.text(id), .text(recognized.joined), .blob(geometry)]
             )
+
+        case let .faces(faces):
+            try replaceFaces(faces, for: feature.assetID, work: &faceWork, in: database)
         }
     }
 

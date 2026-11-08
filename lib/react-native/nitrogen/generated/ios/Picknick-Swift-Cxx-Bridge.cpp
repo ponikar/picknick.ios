@@ -54,6 +54,14 @@ namespace margelo::nitro::picknick::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::vector<FaceGroup>& /* result */)>
+  Func_void_std__vector_FaceGroup_ create_Func_void_std__vector_FaceGroup_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = Picknick::Func_void_std__vector_FaceGroup_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<FaceGroup>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::shared_ptr<HybridPicknickSpec>
   std::shared_ptr<HybridPicknickSpec> create_std__shared_ptr_HybridPicknickSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     Picknick::HybridPicknickSpec_cxx swiftPart = Picknick::HybridPicknickSpec_cxx::fromUnsafe(swiftUnsafePointer);

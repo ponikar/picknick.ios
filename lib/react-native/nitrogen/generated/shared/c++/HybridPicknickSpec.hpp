@@ -23,6 +23,8 @@ namespace margelo::nitro::picknick { struct IndexStatus; }
 namespace margelo::nitro::picknick { struct SearchHit; }
 // Forward declaration of `SearchOptions` to properly resolve imports.
 namespace margelo::nitro::picknick { struct SearchOptions; }
+// Forward declaration of `FaceGroup` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceGroup; }
 
 #include <NitroModules/Promise.hpp>
 #include "PicknickConfig.hpp"
@@ -34,6 +36,7 @@ namespace margelo::nitro::picknick { struct SearchOptions; }
 #include <vector>
 #include <string>
 #include "SearchOptions.hpp"
+#include "FaceGroup.hpp"
 
 namespace margelo::nitro::picknick {
 
@@ -71,6 +74,9 @@ namespace margelo::nitro::picknick {
       virtual std::shared_ptr<Promise<IndexStatus>> indexLibrary(const std::optional<std::function<void(const IndexStatus& /* status */)>>& onProgress) = 0;
       virtual std::shared_ptr<Promise<IndexStatus>> getStatus() = 0;
       virtual std::shared_ptr<Promise<std::vector<SearchHit>>> search(const std::string& query, const std::optional<SearchOptions>& options) = 0;
+      virtual std::shared_ptr<Promise<std::vector<FaceGroup>>> faceGroups() = 0;
+      virtual std::shared_ptr<Promise<void>> nameFace(const std::string& faceId, const std::string& name) = 0;
+      virtual std::shared_ptr<Promise<void>> unnameFace(const std::string& faceId) = 0;
 
     protected:
       // Hybrid Setup

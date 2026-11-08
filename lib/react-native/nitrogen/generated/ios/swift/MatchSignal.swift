@@ -25,6 +25,8 @@ public extension MatchSignal {
         self = .text
       case "place":
         self = .place
+      case "person":
+        self = .person
       case "filter":
         self = .filter
       default:
@@ -45,6 +47,8 @@ public extension MatchSignal {
         return "text"
       case .place:
         return "place"
+      case .person:
+        return "person"
       case .filter:
         return "filter"
     }

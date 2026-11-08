@@ -33,7 +33,8 @@ namespace margelo::nitro::picknick {
     LABEL      SWIFT_NAME(label) = 1,
     TEXT      SWIFT_NAME(text) = 2,
     PLACE      SWIFT_NAME(place) = 3,
-    FILTER      SWIFT_NAME(filter) = 4,
+    PERSON      SWIFT_NAME(person) = 4,
+    FILTER      SWIFT_NAME(filter) = 5,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::picknick
@@ -50,6 +51,7 @@ namespace margelo::nitro {
         case hashString("label"): return margelo::nitro::picknick::MatchSignal::LABEL;
         case hashString("text"): return margelo::nitro::picknick::MatchSignal::TEXT;
         case hashString("place"): return margelo::nitro::picknick::MatchSignal::PLACE;
+        case hashString("person"): return margelo::nitro::picknick::MatchSignal::PERSON;
         case hashString("filter"): return margelo::nitro::picknick::MatchSignal::FILTER;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum MatchSignal - invalid value!");
@@ -61,6 +63,7 @@ namespace margelo::nitro {
         case margelo::nitro::picknick::MatchSignal::LABEL: return JSIConverter<std::string>::toJSI(runtime, "label");
         case margelo::nitro::picknick::MatchSignal::TEXT: return JSIConverter<std::string>::toJSI(runtime, "text");
         case margelo::nitro::picknick::MatchSignal::PLACE: return JSIConverter<std::string>::toJSI(runtime, "place");
+        case margelo::nitro::picknick::MatchSignal::PERSON: return JSIConverter<std::string>::toJSI(runtime, "person");
         case margelo::nitro::picknick::MatchSignal::FILTER: return JSIConverter<std::string>::toJSI(runtime, "filter");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert MatchSignal to JS - invalid value: "
@@ -77,6 +80,7 @@ namespace margelo::nitro {
         case hashString("label"):
         case hashString("text"):
         case hashString("place"):
+        case hashString("person"):
         case hashString("filter"):
           return true;
         default:

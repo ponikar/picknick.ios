@@ -23,6 +23,7 @@ public enum SearchSignal: String, Hashable, Sendable, CaseIterable {
     case label
     case text
     case place
+    case person
     /// No free text was given, so assets are listed by filter alone.
     case filter
 }

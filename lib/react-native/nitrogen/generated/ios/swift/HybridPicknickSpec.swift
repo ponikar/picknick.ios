@@ -18,6 +18,9 @@ public protocol HybridPicknickSpec_protocol: HybridObject {
   func indexLibrary(onProgress: ((_ status: IndexStatus) -> Void)?) throws -> Promise<IndexStatus>
   func getStatus() throws -> Promise<IndexStatus>
   func search(query: String, options: SearchOptions?) throws -> Promise<[SearchHit]>
+  func faceGroups() throws -> Promise<[FaceGroup]>
+  func nameFace(faceId: String, name: String) throws -> Promise<Void>
+  func unnameFace(faceId: String) throws -> Promise<Void>
 }
 
 public extension HybridPicknickSpec_protocol {

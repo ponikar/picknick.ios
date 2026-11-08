@@ -8,6 +8,12 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `FaceBox` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceBox; }
+// Forward declaration of `FaceGroup` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceGroup; }
+// Forward declaration of `FaceRef` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceRef; }
 // Forward declaration of `HybridPicknickSpec` to properly resolve imports.
 namespace margelo::nitro::picknick { class HybridPicknickSpec; }
 // Forward declaration of `IndexStatus` to properly resolve imports.
@@ -24,6 +30,9 @@ namespace margelo::nitro::picknick { struct SearchHit; }
 namespace margelo::nitro::picknick { struct SearchOptions; }
 
 // Include C++ defined types
+#include "FaceBox.hpp"
+#include "FaceGroup.hpp"
+#include "FaceRef.hpp"
 #include "HybridPicknickSpec.hpp"
 #include "IndexStatus.hpp"
 #include "MatchSignal.hpp"
