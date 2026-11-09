@@ -8,6 +8,12 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `FaceBox` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceBox; }
+// Forward declaration of `FaceGroup` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceGroup; }
+// Forward declaration of `FaceRef` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceRef; }
 // Forward declaration of `HybridPicknickSpec` to properly resolve imports.
 namespace margelo::nitro::picknick { class HybridPicknickSpec; }
 // Forward declaration of `IndexStatus` to properly resolve imports.
@@ -26,6 +32,9 @@ namespace margelo::nitro::picknick { struct SearchOptions; }
 namespace Picknick { class HybridPicknickSpec_cxx; }
 
 // Include C++ defined types
+#include "FaceBox.hpp"
+#include "FaceGroup.hpp"
+#include "FaceRef.hpp"
 #include "HybridPicknickSpec.hpp"
 #include "IndexStatus.hpp"
 #include "MatchSignal.hpp"
@@ -288,6 +297,62 @@ namespace margelo::nitro::picknick::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::vector<FaceRef>
+  /**
+   * Specialized version of `std::vector<FaceRef>`.
+   */
+  using std__vector_FaceRef_ = std::vector<FaceRef>;
+  inline std::vector<FaceRef> create_std__vector_FaceRef_(size_t size) noexcept {
+    std::vector<FaceRef> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<FaceGroup>
+  /**
+   * Specialized version of `std::vector<FaceGroup>`.
+   */
+  using std__vector_FaceGroup_ = std::vector<FaceGroup>;
+  inline std::vector<FaceGroup> create_std__vector_FaceGroup_(size_t size) noexcept {
+    std::vector<FaceGroup> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<FaceGroup>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<FaceGroup>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_FaceGroup___ = std::shared_ptr<Promise<std::vector<FaceGroup>>>;
+  inline std::shared_ptr<Promise<std::vector<FaceGroup>>> create_std__shared_ptr_Promise_std__vector_FaceGroup___() noexcept {
+    return Promise<std::vector<FaceGroup>>::create();
+  }
+  inline PromiseHolder<std::vector<FaceGroup>> wrap_std__shared_ptr_Promise_std__vector_FaceGroup___(std::shared_ptr<Promise<std::vector<FaceGroup>>> promise) noexcept {
+    return PromiseHolder<std::vector<FaceGroup>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<FaceGroup>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<FaceGroup>&)>`.
+   */
+  using Func_void_std__vector_FaceGroup_ = std::function<void(const std::vector<FaceGroup>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<FaceGroup>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_FaceGroup__Wrapper final {
+  public:
+    explicit Func_void_std__vector_FaceGroup__Wrapper(std::function<void(const std::vector<FaceGroup>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<FaceGroup>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<FaceGroup> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<FaceGroup>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_FaceGroup_ create_Func_void_std__vector_FaceGroup_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_FaceGroup__Wrapper wrap_Func_void_std__vector_FaceGroup_(Func_void_std__vector_FaceGroup_ value) noexcept {
+    return Func_void_std__vector_FaceGroup__Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<HybridPicknickSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridPicknickSpec>`.
@@ -334,6 +399,15 @@ namespace margelo::nitro::picknick::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_std__vector_SearchHit____ create_Result_std__shared_ptr_Promise_std__vector_SearchHit____(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<std::vector<SearchHit>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<FaceGroup>>>>
+  using Result_std__shared_ptr_Promise_std__vector_FaceGroup____ = Result<std::shared_ptr<Promise<std::vector<FaceGroup>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_FaceGroup____ create_Result_std__shared_ptr_Promise_std__vector_FaceGroup____(const std::shared_ptr<Promise<std::vector<FaceGroup>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<FaceGroup>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_FaceGroup____ create_Result_std__shared_ptr_Promise_std__vector_FaceGroup____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<FaceGroup>>>>::withError(error);
   }
 
 } // namespace margelo::nitro::picknick::bridge::swift

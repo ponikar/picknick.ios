@@ -62,6 +62,17 @@ async function selfTest(onProgress: (status: IndexStatus) => void): Promise<Sear
 
   const vietnam = await Picknick.search('vietnam')
   check(vietnam.length === 0, `search('vietnam') returned ${vietnam.length}`)
+
+  const face = (await Picknick.faceGroups()).flatMap((group) => group.faces)[0]
+  if (face) {
+    await Picknick.nameFace(face.faceId, 'selftestperson')
+    const person = await Picknick.search('selftestperson')
+    check(
+      person.some((hit) => hit.id === face.photoId && hit.matchedBy.includes('person')),
+      "search('selftestperson') missed the named face's photo"
+    )
+    await Picknick.unnameFace(face.faceId)
+  }
   return dog
 }
 

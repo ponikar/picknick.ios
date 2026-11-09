@@ -24,6 +24,12 @@ namespace margelo::nitro::picknick { struct SearchHit; }
 namespace margelo::nitro::picknick { enum class MatchSignal; }
 // Forward declaration of `SearchOptions` to properly resolve imports.
 namespace margelo::nitro::picknick { struct SearchOptions; }
+// Forward declaration of `FaceGroup` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceGroup; }
+// Forward declaration of `FaceRef` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceRef; }
+// Forward declaration of `FaceBox` to properly resolve imports.
+namespace margelo::nitro::picknick { struct FaceBox; }
 
 #include <NitroModules/Promise.hpp>
 #include "PicknickConfig.hpp"
@@ -36,6 +42,9 @@ namespace margelo::nitro::picknick { struct SearchOptions; }
 #include <vector>
 #include "MatchSignal.hpp"
 #include "SearchOptions.hpp"
+#include "FaceGroup.hpp"
+#include "FaceRef.hpp"
+#include "FaceBox.hpp"
 
 #include "Picknick-Swift-Cxx-Umbrella.hpp"
 
@@ -121,6 +130,30 @@ namespace margelo::nitro::picknick {
     }
     inline std::shared_ptr<Promise<std::vector<SearchHit>>> search(const std::string& query, const std::optional<SearchOptions>& options) override {
       auto __result = _swiftPart.search(query, options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<FaceGroup>>> faceGroups() override {
+      auto __result = _swiftPart.faceGroups();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> nameFace(const std::string& faceId, const std::string& name) override {
+      auto __result = _swiftPart.nameFace(faceId, name);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> unnameFace(const std::string& faceId) override {
+      auto __result = _swiftPart.unnameFace(faceId);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

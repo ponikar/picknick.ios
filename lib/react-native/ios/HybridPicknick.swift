@@ -53,6 +53,34 @@ final class HybridPicknick: HybridPicknickSpec {
             }
         }
     }
+
+    func faceGroups() throws -> Promise<[FaceGroup]> {
+        Promise.async { [service] in
+            try await service.faceGroups().map { group in
+                FaceGroup(
+                    id: Double(group.id),
+                    name: group.name,
+                    photoCount: Double(group.photoCount),
+                    faces: group.faces.map { face in
+                        FaceRef(
+                            faceId: face.id,
+                            photoId: face.photoId,
+                            uri: "ph://" + face.photoId,
+                            box: FaceBox(x: face.x, y: face.y, width: face.width, height: face.height)
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    func nameFace(faceId: String, name: String) throws -> Promise<Void> {
+        Promise.async { [service] in try await service.nameFace(faceId, as: name) }
+    }
+
+    func unnameFace(faceId: String) throws -> Promise<Void> {
+        Promise.async { [service] in try await service.unnameFace(faceId) }
+    }
 }
 
 private enum MappingError: LocalizedError {

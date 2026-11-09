@@ -19,6 +19,9 @@ namespace margelo::nitro::picknick {
       prototype.registerHybridMethod("indexLibrary", &HybridPicknickSpec::indexLibrary);
       prototype.registerHybridMethod("getStatus", &HybridPicknickSpec::getStatus);
       prototype.registerHybridMethod("search", &HybridPicknickSpec::search);
+      prototype.registerHybridMethod("faceGroups", &HybridPicknickSpec::faceGroups);
+      prototype.registerHybridMethod("nameFace", &HybridPicknickSpec::nameFace);
+      prototype.registerHybridMethod("unnameFace", &HybridPicknickSpec::unnameFace);
     });
   }
 

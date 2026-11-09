@@ -13,6 +13,7 @@ enum Schema {
     static let migrations: [Migration] = [
         Migration(version: 1, statements: initialSchema),
         Migration(version: 2, statements: placeNames),
+        Migration(version: 3, statements: faces),
     ]
 
     static var currentVersion: Int32 {
@@ -119,5 +120,40 @@ enum Schema {
     -- Place names come from the host app's gazetteer, not SQL. Clearing the
     -- fingerprint makes the next sync re-read these assets and name them.
     UPDATE asset SET modified_at = NULL WHERE latitude IS NOT NULL;
+    """
+
+    /// Faces per asset and the names users gave them.
+    ///
+    /// `face_name` is separate from `face` so names survive re-extraction,
+    /// which replaces every `face` row of an asset. Its box is the box of the
+    /// face the name was given to, used to move the name to an overlapping face
+    /// when the detector's boxes shift.
+    private static let faces = """
+    CREATE TABLE face (
+        id          TEXT    PRIMARY KEY,
+        asset_id    TEXT    NOT NULL REFERENCES asset(id) ON DELETE CASCADE,
+        x           REAL    NOT NULL,
+        y           REAL    NOT NULL,
+        width       REAL    NOT NULL,
+        height      REAL    NOT NULL,
+        fingerprint BLOB    NOT NULL,
+        group_id    INTEGER NOT NULL,
+        auto_name   TEXT
+    ) STRICT;
+
+    CREATE INDEX face_by_asset ON face(asset_id);
+    CREATE INDEX face_by_group ON face(group_id);
+
+    CREATE TABLE face_name (
+        face_id  TEXT PRIMARY KEY,
+        asset_id TEXT NOT NULL REFERENCES asset(id) ON DELETE CASCADE,
+        x        REAL NOT NULL,
+        y        REAL NOT NULL,
+        width    REAL NOT NULL,
+        height   REAL NOT NULL,
+        name     TEXT NOT NULL
+    ) STRICT;
+
+    CREATE INDEX face_name_by_asset ON face_name(asset_id);
     """
 }

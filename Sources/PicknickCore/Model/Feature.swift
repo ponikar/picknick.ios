@@ -86,12 +86,14 @@ public enum FeatureValue: Hashable, Sendable {
     case embedding(Embedding)
     case labels([Label])
     case text(RecognizedText)
+    case faces([DetectedFace])
 
     public var stage: IndexStage {
         switch self {
         case .embedding: .embedding
         case .labels: .labels
         case .text: .text
+        case .faces: .faces
         }
     }
 }

@@ -10,6 +10,7 @@ public enum IndexStage: String, Sendable, Codable, CaseIterable, Comparable {
     case embedding
     case labels
     case text
+    case faces
 
     /// Ascending cost, which is also the order the pipeline runs them in.
     public var cost: Int {
@@ -18,6 +19,7 @@ public enum IndexStage: String, Sendable, Codable, CaseIterable, Comparable {
         case .embedding: 1
         case .labels: 2
         case .text: 3
+        case .faces: 4
         }
     }
 

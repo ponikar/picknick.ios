@@ -45,6 +45,7 @@ public actor SearchEngine {
     private let index: any SearchableIndex
     private let embedder: (any TextEmbedder)?
     private let placeVocabulary: (any PlaceVocabulary)?
+    private let people: (any PersonIndex)?
     private let configuration: Configuration
 
     private var cachedMatrix: NormalizedMatrix?
@@ -54,11 +55,13 @@ public actor SearchEngine {
         index: any SearchableIndex,
         embedder: (any TextEmbedder)? = nil,
         placeVocabulary: (any PlaceVocabulary)? = nil,
+        people: (any PersonIndex)? = nil,
         configuration: Configuration = .init()
     ) {
         self.index = index
         self.embedder = embedder
         self.placeVocabulary = placeVocabulary
+        self.people = people
         self.configuration = configuration
     }
 
@@ -80,12 +83,24 @@ public actor SearchEngine {
         }
         guard !words.isEmpty || embedder != nil else { return [] }
 
-        let (knownPlaces, contentWords) = splitKnownPlaces(words)
+        let (persons, otherWords) = try await splitKnownPersons(words)
+        var withPersons: [AssetID]?
+        if let people, !persons.isEmpty {
+            let listed = try await people.assets(withAll: persons, filter: query.filter, limit: otherWords.isEmpty ? query.limit : nil)
+            guard !otherWords.isEmpty else {
+                return listed.enumerated().map { SearchResult(id: $1, score: 1, ranks: [.person: $0 + 1]) }
+            }
+            withPersons = listed
+        }
+        let restText = withPersons == nil ? text : otherWords.joined(separator: " ")
+        let allowed = withPersons.map(Set.init)
+
+        let (knownPlaces, contentWords) = splitKnownPlaces(otherWords)
         var evidence = Evidence()
 
         if knownPlaces.isEmpty {
-            try await collect(text: text, words: words, filter: query.filter, depth: depth, into: &evidence)
-            for (rank, id) in try await placeRanking(words: words, filter: query.filter, depth: depth).enumerated() {
+            try await collect(text: restText, words: otherWords, filter: query.filter, depth: depth, within: allowed, into: &evidence)
+            for (rank, id) in try await placeRanking(words: otherWords, filter: query.filter, depth: depth).enumerated() {
                 evidence.add(id, .place, rank: rank + 1, probability: configuration.exactMatchProbability)
             }
         } else {
@@ -96,7 +111,7 @@ public actor SearchEngine {
                 for (rank, id) in inPlace.enumerated() {
                     evidence.add(id, .place, rank: rank + 1, probability: configuration.exactMatchProbability)
                 }
-                for (rank, match) in try await index.textMatches(words, filter: query.filter, limit: depth).enumerated() {
+                for (rank, match) in try await index.textMatches(otherWords, filter: query.filter, limit: depth).enumerated() {
                     evidence.add(match.id, .text, rank: rank + 1, probability: configuration.exactMatchProbability)
                 }
             } else if !inPlace.isEmpty {
@@ -105,10 +120,16 @@ public actor SearchEngine {
                     words: contentWords,
                     filter: query.filter,
                     depth: depth,
+                    within: allowed,
                     into: &evidence
                 )
                 evidence.restrict(to: Set(inPlace))
             }
+        }
+
+        if let withPersons {
+            evidence.restrict(to: Set(withPersons))
+            evidence.mark(withPersons, .person)
         }
 
         return Array(
@@ -119,9 +140,16 @@ public actor SearchEngine {
     }
 
     /// Semantic, label and OCR evidence for `text`.
-    private func collect(text: String, words: [String], filter: SearchFilter, depth: Int, into evidence: inout Evidence) async throws {
+    private func collect(
+        text: String,
+        words: [String],
+        filter: SearchFilter,
+        depth: Int,
+        within allowed: Set<AssetID>? = nil,
+        into evidence: inout Evidence
+    ) async throws {
         if let embedder {
-            let hits = try await semanticHits(for: try await embedder.embed(text), filter: filter, depth: depth)
+            let hits = try await semanticHits(for: try await embedder.embed(text), filter: filter, depth: depth, within: allowed)
             for (rank, hit) in hits.enumerated() {
                 evidence.add(hit.id, .semantic, rank: rank + 1, probability: configuration.semanticProbability(hit.cosine))
             }
@@ -134,6 +162,34 @@ public actor SearchEngine {
         for (rank, match) in try await index.textMatches(words, filter: filter, limit: depth).enumerated() {
             evidence.add(match.id, .text, rank: rank + 1, probability: configuration.exactMatchProbability)
         }
+    }
+
+    /// Longest runs of query words that name a known person, and the words left
+    /// over. Names are read on every search so a new name is found at once.
+    private func splitKnownPersons(_ words: [String]) async throws -> (persons: [String], rest: [String]) {
+        guard let people, !words.isEmpty else { return ([], words) }
+        var namesByPhrase: [String: String] = [:]
+        var longest = 0
+        for name in try await people.personNames() {
+            let nameWords = QueryTerms.words(in: name)
+            guard !nameWords.isEmpty else { continue }
+            namesByPhrase[nameWords.joined(separator: " ")] = name
+            longest = max(longest, nameWords.count)
+        }
+        guard longest > 0 else { return ([], words) }
+
+        var covered = Array(repeating: false, count: words.count)
+        var persons: [String] = []
+        for length in stride(from: min(words.count, longest), through: 1, by: -1) {
+            for start in 0...(words.count - length) where !covered[start..<(start + length)].contains(true) {
+                let phrase = words[start..<(start + length)].joined(separator: " ")
+                guard let name = namesByPhrase[phrase] else { continue }
+                if !persons.contains(name) { persons.append(name) }
+                covered.replaceSubrange(start..<(start + length), with: repeatElement(true, count: length))
+            }
+        }
+        let rest = words.indices.filter { !covered[$0] }.map { words[$0] }
+        return (persons, rest)
     }
 
     /// Longest runs of query words that name a well-known place, and the words left over.
@@ -175,12 +231,22 @@ public actor SearchEngine {
 
     private static let maximumPlaceWords = 5
 
-    private func semanticHits(for query: Embedding, filter: SearchFilter, depth: Int) async throws -> [(id: AssetID, cosine: Float)] {
+    private func semanticHits(
+        for query: Embedding,
+        filter: SearchFilter,
+        depth: Int,
+        within: Set<AssetID>?
+    ) async throws -> [(id: AssetID, cosine: Float)] {
         guard query.dimensions > 0 else { return [] }
         let matrix = try await matrix(model: query.model, dimensions: query.dimensions)
         guard matrix.count > 0 else { return [] }
 
-        let allowed = Set(try await index.assets(matching: filter, limit: nil))
+        let allowed: Set<AssetID>
+        if let within {
+            allowed = within
+        } else {
+            allowed = Set(try await index.assets(matching: filter, limit: nil))
+        }
         let scores = matrix.similarities(to: query.values)
 
         return scores.indices
@@ -221,6 +287,14 @@ private struct Evidence {
     mutating func restrict(to allowed: Set<AssetID>) {
         probabilities = probabilities.filter { allowed.contains($0.key) }
         ranks = ranks.filter { allowed.contains($0.key) }
+    }
+
+    /// Records `signal` ranks for assets already found; probability 0 leaves
+    /// the noisy-OR score unchanged, since the signal only restricts.
+    mutating func mark(_ ordered: [AssetID], _ signal: SearchSignal) {
+        for (rank, id) in ordered.enumerated() where probabilities[id] != nil {
+            add(id, signal, rank: rank + 1, probability: 0)
+        }
     }
 
     func results() -> [SearchResult] {
