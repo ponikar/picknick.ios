@@ -20,7 +20,7 @@ Today the index stores CLIP embeddings, Vision labels, OCR text and places; face
 - R-02 WHEN a photo has no faces, THE SYSTEM SHALL store no face records and mark the face stage complete for it.
 - R-03 WHEN the app asks for face groups, THE SYSTEM SHALL return the stored groups, each with its face references, photo count and the person name shared by its faces if any.
 - R-04 WHEN the user names one face, THE SYSTEM SHALL store that name on that face as a user name and recompute every automatic name.
-- R-05 THE SYSTEM SHALL give a face without a user name the automatic name P only when every user-named face within the cutoff of it is named P; otherwise it has no name.
+- R-05 THE SYSTEM SHALL give a face without a user name the automatic name P only when the nearest user-named face is named P, is within the cutoff, and every user-named face of another person is at least 10% of the cutoff farther; otherwise it has no name.
 - R-06 WHEN the user renames or unnames a face, THE SYSTEM SHALL change only that face's user name, recompute every automatic name, and never change another face's user name.
 - R-07 WHEN a batch of new photos is saved, THE SYSTEM SHALL assign each new face a group and an automatic name by the R-05 rule in the same save.
 - R-15 WHEN the naming order differs but the user names are the same, THE SYSTEM SHALL produce the same automatic names.
@@ -79,7 +79,7 @@ Today the index stores CLIP embeddings, Vision labels, OCR text and places; face
 - RN `PicknickService` keeps the store and calls `PersonIndex` methods on it for R-14.
 - Distance = Euclidean distance between stored fingerprint vectors, the same value as `FeaturePrintObservation.distance(to:)`; "within the cutoff" means distance <= cutoff.
 - Face detection with Vision `DetectFaceRectanglesRequest`.
-- Face fingerprint: Vision `GenerateImageFeaturePrintRequest` on the face crop. No bundled face model.
+- Face fingerprint: Vision `GenerateImageFeaturePrintRequest` on a square crop 1.8x the face box. No bundled face model.
 - Similarity cutoff: a configuration value; default chosen by the face eval (section 8).
 - New SQLite tables through a forward-only migration (version 3); existing tables unchanged.
 - Person-name matching mirrors `splitKnownPlaces` in `SearchEngine`, but names are read from the index on every search (new `PersonIndex` protocol in PicknickCore, implemented by `SQLiteIndexStore`), not frozen at init.
@@ -128,3 +128,4 @@ lib/react-native/ios/PicknickService.swift
 2026-11-08 Verification round 2 (7 gaps) filled by Claude: cutoff via store init; PersonIndex methods; person+place = AND; `.faces([])` for zero; reattach by id then IoU on every replace; duplicate boxes deduped; top-left boxes; RN keeps store. Edited/cropped photos keep stale boxes until re-index (accepted; existing behaviour for all stages).
 2026-11-08 Verification round 1 (7 gaps) filled by Claude at user request: names in their own table keyed by stable face id; IoU carry-over on model change; naming inside store commit; order-independent R-05 rule; names read per search; RN shapes and `person` signal added.
 2026-11-08 Face eval (200 LFW photos, 20 people, 166 scored faces): no useful cutoff reaches 90% correct. Best: 0.68 names 0.6% at 100%; 0.58 names 17% at 82%; 0.49 names 30% at 72%. Nearest-person accuracy 51% (chance 5%). Default set to 0.68 per section 8 rule. Apple's feature print is too weak for identity; a face model is needed to meet the bar.
+2026-11-09 Built-in only, improved: square crop 1.8x the face box (nearest-person accuracy 47% -> 79%); R-05 changed from "all named faces within cutoff agree" to "clear nearest person" (more faces named at the same accuracy); rotation by face roll gave no clear gain on LFW (already aligned). Eval: cutoff 0.72 names 58% of faces at 97% correct. Face stage version 2 re-indexes faces. Cutoff was tuned and measured on the same 200 photos; accuracy on a personal library is not measured.

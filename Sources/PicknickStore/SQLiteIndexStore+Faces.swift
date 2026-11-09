@@ -295,19 +295,23 @@ private extension SQLiteIndexStore {
         }
     }
 
-    /// The name P when every user-named face within the cutoff is named P
-    /// (case-insensitively), else nil. The spelling is the smallest one, so the
-    /// result never depends on naming order (R-15).
+    /// The name of the nearest user-named face when it is within the cutoff and
+    /// every face of another person is at least `rivalGap` of the cutoff farther,
+    /// else nil. Depends only on the set of user names, so naming order never
+    /// changes it (R-15); the smallest spelling of the name is returned.
     func automaticName(for fingerprint: [Float], named: [(fingerprint: [Float], name: String)]) -> String? {
-        var key: String?
-        var spelling: String?
-        for candidate in named where Self.distance(fingerprint, candidate.fingerprint) <= faceCutoff {
-            let candidateKey = Self.nameKey(candidate.name)
-            if let key, key != candidateKey { return nil }
-            key = candidateKey
-            spelling = spelling.map { Swift.min($0, candidate.name) } ?? candidate.name
+        var nearest: [String: Double] = [:]
+        var spellings: [String: String] = [:]
+        for candidate in named {
+            let key = Self.nameKey(candidate.name)
+            let distance = Double(Self.distance(fingerprint, candidate.fingerprint))
+            nearest[key] = Swift.min(nearest[key] ?? .infinity, distance)
+            spellings[key] = spellings[key].map { Swift.min($0, candidate.name) } ?? candidate.name
         }
-        return spelling
+        let ranked = nearest.sorted { ($0.value, $0.key) < ($1.value, $1.key) }
+        guard let best = ranked.first, best.value <= faceCutoff else { return nil }
+        if ranked.count > 1, ranked[1].value - best.value < faceCutoff * Self.rivalGap { return nil }
+        return spellings[best.key]
     }
 
     func nearestFace(to fingerprint: [Float], in known: [FaceCommit.KnownFace]) -> FaceCommit.KnownFace? {

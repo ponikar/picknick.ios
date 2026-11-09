@@ -132,6 +132,22 @@ struct PersonIndexTests {
         #expect(try await named("bob", in: store) == ["bob"])
     }
 
+    @Test("R-05: a clear nearest person wins even when another person is within the cutoff")
+    func clearWinnerIsNamed() async throws {
+        let store = try await makeStore(.photos([
+            ("alice", [.fixture(0)]),
+            ("bob", [.fixture(0.8)]),
+            ("closerToAlice", [.fixture(0.3)]),
+            ("tooClose", [.fixture(0.39)]),
+        ]))
+
+        try await store.nameFace(id("alice"), as: "alice")
+        try await store.nameFace(id("bob"), as: "bob")
+
+        #expect(try await named("alice", in: store) == ["alice", "closerToAlice"])
+        #expect(try await named("bob", in: store) == ["bob"])
+    }
+
     // R-15
     @Test("R-15: naming in a different order gives the same automatic names")
     func orderIndependent() async throws {

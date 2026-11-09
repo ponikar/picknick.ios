@@ -15,9 +15,12 @@ public actor SQLiteIndexStore: IndexStore {
     /// treated as the same person, for grouping and automatic naming.
     public let faceCutoff: Double
 
-    /// From FaceCutoffEval on 200 LFW photos of 20 people: the only cutoff with
-    /// at least 90% correct automatic names, though it names under 1% of faces.
-    public static let defaultFaceCutoff = 0.68
+    /// From FaceCutoffEval on 200 LFW photos of 20 people with one named face
+    /// each: 58% of faces named automatically, 97% of them correctly.
+    public static let defaultFaceCutoff = 0.72
+
+    /// A face is named only when the next person is this share of the cutoff farther away.
+    static let rivalGap = 0.1
 
     /// Parameter count per `IN` clause, kept well under SQLite's own limit so
     /// callers never have to think about how many ids they pass.

@@ -10,13 +10,17 @@ import Vision
 /// dropped, because their feature prints are too noisy to name.
 public struct VisionFaceExtractor: FeatureExtractor {
     public let stage: IndexStage = .faces
-    public let version = 1
+    public let version = 2
     public let preferredPixelSize: Int
 
     public let minimumFacePixels: Int
+    public let cropMargin: Double
 
-    public init(minimumFacePixels: Int = 64, preferredPixelSize: Int = 1024) {
+    /// `cropMargin` 1.8 doubled the share of correct nearest-person matches over a
+    /// tight crop in FaceCutoffEval; the feature print needs hair and jaw context.
+    public init(minimumFacePixels: Int = 64, cropMargin: Double = 1.8, preferredPixelSize: Int = 1024) {
         self.minimumFacePixels = minimumFacePixels
+        self.cropMargin = cropMargin
         self.preferredPixelSize = preferredPixelSize
     }
 
@@ -34,11 +38,16 @@ public struct VisionFaceExtractor: FeatureExtractor {
             let box = VisionTextExtractor.topLeftRect(fromBottomLeft: observation.boundingBox.cgRect)
             guard seen.insert(FaceID(asset: context.metadata.id, box: box)).inserted else { continue }
 
-            guard let crop = image.cropping(to: pixels) else { continue }
+            guard let crop = image.cropping(to: Self.square(around: pixels, scale: cropMargin)) else { continue }
             let print = try await GenerateImageFeaturePrintRequest().perform(on: crop)
             faces.append(DetectedFace(boundingBox: box, fingerprint: Self.values(of: print)))
         }
         return .faces(faces)
+    }
+
+    static func square(around rect: CGRect, scale: Double) -> CGRect {
+        let side = max(rect.width, rect.height) * scale
+        return CGRect(x: rect.midX - side / 2, y: rect.midY - side / 2, width: side, height: side).integral
     }
 
     static func values(of print: FeaturePrintObservation) -> [Float] {

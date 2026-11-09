@@ -79,8 +79,11 @@ struct FaceCutoffEval {
             var named = 0
             var correct = 0
             for (face, candidates) in zip(rest, distances) {
-                let within = Set(candidates.filter { $0.0 <= cutoff }.map(\.1))
-                guard within.count == 1, let person = within.first else { continue }
+                let ranked = candidates.sorted { $0.0 < $1.0 }
+                guard let top = ranked.first, top.0 <= cutoff else { continue }
+                let rival = ranked.dropFirst().first { $0.1 != top.1 }?.0 ?? .infinity
+                guard rival - top.0 >= cutoff * 0.1 else { continue }
+                let person = top.1
                 named += 1
                 if person == face.person { correct += 1 }
             }
